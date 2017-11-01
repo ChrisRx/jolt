@@ -138,8 +138,6 @@ func (j *Logger) printFields(m Fields) error {
 		switch t := v.(type) {
 		case func() string:
 			tmp[k] = t()
-		case FieldFunc:
-			tmp[k] = t()
 		default:
 			tmp[k] = v
 		}

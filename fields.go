@@ -8,9 +8,9 @@ import (
 	"sync"
 )
 
+// Fields represents key/value pairs and will be
+// JSON encoded when passed to Logger.Print.
 type Fields map[string]interface{}
-
-type FieldFunc func() string
 
 // Location logs the source file and line number of the Logger.Print
 // caller.
@@ -18,13 +18,15 @@ type FieldFunc func() string
 // If the error is wrapped by github.com/pkg/errors then then the source
 // file and line number will be based upon when the original error was
 // wrapped.
-func Location() FieldFunc {
+func Location() func() string {
 	return func() string {
 		return location()
 	}
 }
 
-func Package() FieldFunc {
+// Package logs the package name with each call to
+// Logger.Print.
+func Package() func() string {
 	return func() string {
 		return pkgName()
 	}
@@ -36,7 +38,7 @@ var stacktracePool = sync.Pool{
 	},
 }
 
-func Stacktrace() []runtime.Frame {
+func stacktrace() []runtime.Frame {
 	pcs := stacktracePool.Get().([]uintptr)
 	var numFrames int
 	for {
@@ -58,7 +60,7 @@ func Stacktrace() []runtime.Frame {
 }
 
 func callerFrame() *runtime.Frame {
-	frames := Stacktrace()
+	frames := stacktrace()
 	if len(frames) == 0 {
 		return nil
 	}
